@@ -36,7 +36,7 @@ class Cell(
     private val fontSizeMultiContent = 0.8 * min(width, height) / max(
         game.board.blockSizeX, game.board.blockSizeY)
     private val contentXPadding = (width - fontSizeMultiContent * game.board.blockSizeX) * .4
-    private val contentYPadding = (height - fontSizeMultiContent * game.board.blockSizeY) * .4
+    private val contentYPadding = (height - fontSizeMultiContent * game.board.blockSizeY) * .2
 
     fun draw(value: Int, color: RGBA) {
         removeChild(content)
@@ -65,7 +65,6 @@ class Cell(
                         }
                     }
                 }
-                centerOn(rect)
             }
         }
     }
