@@ -39,12 +39,12 @@ class SudokuGui(
     private val pxCell = if (landscape) {
             min(
                 height / (game.board.blockSize + 1),
-                width / (game.board.blockSize + 2)
+                width / (game.board.blockSize + 5)
             )
         } else {
             min(
                 width / (game.board.blockSize + 1),
-                height / (game.board.blockSize + 2)
+                height / (game.board.blockSize + 5)
             )
         }
     private val pxPadding = 0.03 * pxCell

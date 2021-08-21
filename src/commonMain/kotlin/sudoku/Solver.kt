@@ -31,9 +31,9 @@ class Solver(private val sudoku: Sudoku) {
 
     private tailrec fun solveLoop(): Boolean = when {
         sudoku.validator.isSolved() -> { println("Solved"); true }
-        solve1() -> { print('+'); solveLoop() }
-        solve2() -> { print('+'); solveLoop() }
-        solveBacktrack() -> { print('+'); solveLoop() }
+        solve1() -> { solveLoop() }
+        solve2() -> { solveLoop() }
+        solveBacktrack() -> { solveLoop() }
         else -> { println("!!!"); false }
     }
 
@@ -49,6 +49,7 @@ class Solver(private val sudoku: Sudoku) {
                 ++valuesSolved
             }
         }
+        print(".".repeat(valuesSolved))
         return valuesSolved > 0
     }
 
@@ -69,6 +70,7 @@ class Solver(private val sudoku: Sudoku) {
                 }
             }
         }
+        print(".".repeat(valuesSolved))
         return valuesSolved > 0
     }
 
@@ -100,6 +102,7 @@ class Solver(private val sudoku: Sudoku) {
 
         return if (result == null) false
         else {
+            print(".")
             for (i in sudoku.board.data.indices) { sudoku.board.data[i] = result[i] }
             true
         }

@@ -1,5 +1,8 @@
+import com.soywiz.korev.ReshapeEvent
+import com.soywiz.korev.addEventListener
 import com.soywiz.korge.Korge
 import com.soywiz.korge.service.storage.storage
+import com.soywiz.korge.view.Container
 import com.soywiz.korma.geom.Anchor
 import com.soywiz.korma.geom.ScaleMode
 import gui.Icons
@@ -15,21 +18,34 @@ import sudoku.Sudoku.Companion.loadSudokuFromStorage
 var game = dummySudoku()
 
 
-suspend fun main() = Korge(
+suspend fun main(): Unit = Korge(
 	scaleAnchor = Anchor.TOP_LEFT,
-	scaleMode = ScaleMode.NO_SCALE,
+	scaleMode = ScaleMode.SHOW_ALL,
 	clipBorders = false,
 	bgcolor = theme.background
 ) {
-	if (views.nativeWidth == views.virtualWidth && views.nativeHeight == views.virtualHeight) {
-		views.scaleAnchor = Anchor.MIDDLE_CENTER
-		views.scaleMode = ScaleMode.SHOW_ALL
-		views.clipBorders = true
-	}
-
 	Storage.nativeStorage = storage
 	Icons.load()
 
+	addEventListener<ReshapeEvent> {
+		removeChildren()
+		startGame(
+			views.actualVirtualWidth.toDouble(),
+			views.actualVirtualHeight.toDouble(),
+		)
+	}
+
+	startGame(
+		views.actualVirtualWidth.toDouble(),
+		views.actualVirtualHeight.toDouble(),
+	)
+}
+
+
+fun Container.startGame(
+	width: Double,
+	height: Double
+) {
 	try {
 		game = loadSudokuFromStorage()
 	} catch (e: Exception) {
@@ -37,14 +53,7 @@ suspend fun main() = Korge(
 	}
 
 	if (game.board.size == 0)
-		startSplash(
-			views.nativeWidth.toDouble(),
-			views.nativeHeight.toDouble()
-		)
+		startSplash(width, height)
 	else
-		sudokuGui(
-			views.nativeWidth.toDouble(),
-			views.nativeHeight.toDouble(),
-			loadFromStorage = true
-		)
+		sudokuGui(width, height, loadFromStorage = true)
 }
