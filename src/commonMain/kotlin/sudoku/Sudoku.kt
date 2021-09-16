@@ -87,9 +87,52 @@ class Sudoku constructor(
             }
         }
 
-        fun createSudoku(blockSizeX: Int, blockSizeY: Int): Sudoku {
+        fun createSudoku(blockSizeX: Int, blockSizeY: Int) = createSudoku2(blockSizeX, blockSizeY)
+
+        fun createSudoku1(blockSizeX: Int, blockSizeY: Int): Sudoku {
             val sudoku = blankSudoku(blockSizeX, blockSizeY)
             val solver = Solver(sudoku)
+            while (!solver.solve(true)) {
+                println("----------------")
+                val emptyIndices = (0 until sudoku.board.size).filter { sudoku[it] == 0 }
+                val index = emptyIndices.random()
+                val value = sudoku.candidates.getAt(index).random()
+                solver.internSet(index, value)
+
+                if(solver.solve(false)) {
+                    sudoku.immutableIndices.add(index)
+                } else {
+                    solver.internSet(index, 0)
+                }
+
+                sudoku.reset()
+            }
+
+            sudoku.reset()
+            sudoku.saveToStorage()
+            return sudoku
+        }
+
+        fun createSudoku2(blockSizeX: Int, blockSizeY: Int): Sudoku {
+            val sudoku = blankSudoku(blockSizeX, blockSizeY)
+            val solver = Solver(sudoku)
+
+            do {
+                println("++++++++++++++++")
+                val randomIndices = (0 until sudoku.board.size).shuffled().take(sudoku.board.blockSize)
+                repeat(sudoku.board.blockSize) { i ->
+                    val index = randomIndices[i]
+                    val value = sudoku.candidates.getAt(index).random()
+                    solver.internSet(index, value)
+                }
+            } while (
+                !sudoku.validator.isValid() &&
+                !solver.solve(false) &&
+                sudoku.immutableIndices.addAll(randomIndices)
+            )
+            sudoku.reset()
+
+
             while (!solver.solve(true)) {
                 println("----------------")
                 val emptyIndices = (0 until sudoku.board.size).filter { sudoku[it] == 0 }
