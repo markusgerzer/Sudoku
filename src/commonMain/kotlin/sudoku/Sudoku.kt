@@ -5,9 +5,9 @@ import storage.Storage
 
 
 class Sudoku constructor(
-    val board: Board,
+    board: Board,
     notesData: List<List<Int>> = List(board.data.size) { listOf<Int>() }
-) : Storage.SelfStorable {
+) : Storage.SelfStorable, Board by board {
 
     val immutableIndices = mutableSetOf<Int>()
     var solvedBoard: List<Int>? = null
@@ -17,12 +17,12 @@ class Sudoku constructor(
     val validator = Validator(this)
     val notes = Notes(this, notesData)
 
-    operator fun get(index: Int) = board.data[index]
+    operator fun get(index: Int) = data[index]
 
     operator fun set(index: Int, value: Int) {
         if (index in immutableIndices) return
-        if (value !in board.values && value != 0) throw IllegalArgumentException("Value not valid!")
-        board.data[index] = value
+        if (value !in values && value != 0) throw IllegalArgumentException("Value not valid!")
+        data[index] = value
         reinitialize()
         if (validator.isValid()) notes.adjust(index, value)
         saveToStorage()
@@ -34,16 +34,18 @@ class Sudoku constructor(
     }
 
     fun reset() {
-        for (i in 0 until board.size)
+        for (i in 0 until size)
             if (i !in immutableIndices)
-                board.data[i] = 0
+                data[i] = 0
         candidates.reCalc()
         notes.clear()
     }
 
     override val storageKey: String get() = Sudoku.storageKey
     private fun toMap() = mapOf(
-        "board" to board,
+        "blockSizeX" to blockSizeX,
+        "blockSizeY" to blockSizeY,
+        "data" to data.toList(),
         "solvedBoard" to solvedBoard,
         "immutableIndices" to immutableIndices,
         "notes" to notes
@@ -59,11 +61,11 @@ class Sudoku constructor(
         const val storageKey = "Sudoku"
 
         fun dummySudoku() =
-            Sudoku(Board(0, 0, IntArray(0)))
+            Sudoku(BoardImpl(0, 0, IntArray(0)))
 
         fun blankSudoku(blockSizeX: Int, blockSizeY: Int) =
             Sudoku(
-                Board(
+                BoardImpl(
                     blockSizeX,
                     blockSizeY,
                     IntArray(blockSizeX * blockSizeY * blockSizeX * blockSizeY)
@@ -72,11 +74,10 @@ class Sudoku constructor(
 
         fun loadSudokuFromStorage(): Sudoku {
             val map = Storage.loadFromStorage(storageKey) as Map<*, *>
-            val mapBoard = map["board"] as Map<*, *>
-            val blockSizeX = mapBoard["blockSizeX"] as Int
-            val blockSizeY = mapBoard["blockSizeY"] as Int
-            val boardData = (mapBoard["data"] as List<Int>).toIntArray()
-            val board = Board(blockSizeX, blockSizeY, boardData)
+            val blockSizeX = map["blockSizeX"] as Int
+            val blockSizeY = map["blockSizeY"] as Int
+            val boardData = (map["data"] as List<Int>).toIntArray()
+            val board = BoardImpl(blockSizeX, blockSizeY, boardData)
             val solvedBoard = map["solvedBoard"] as List<Int>?
             val immutableIndices = map["immutableIndices"] as List<Int>
             val notesData = map["notes"] as List<List<Int>>
@@ -94,7 +95,7 @@ class Sudoku constructor(
             val solver = Solver(sudoku)
             while (!solver.solve(true)) {
                 println("----------------")
-                val emptyIndices = (0 until sudoku.board.size).filter { sudoku[it] == 0 }
+                val emptyIndices = (0 until sudoku.size).filter { sudoku[it] == 0 }
                 val index = emptyIndices.random()
                 val value = sudoku.candidates.getAt(index).random()
                 solver.internSet(index, value)
@@ -119,8 +120,8 @@ class Sudoku constructor(
 
             do {
                 println("++++++++++++++++")
-                val randomIndices = (0 until sudoku.board.size).shuffled().take(sudoku.board.blockSize)
-                repeat(sudoku.board.blockSize) { i ->
+                val randomIndices = (0 until sudoku.size).shuffled().take(sudoku.blockSize)
+                repeat(sudoku.blockSize) { i ->
                     val index = randomIndices[i]
                     val value = sudoku.candidates.getAt(index).random()
                     solver.internSet(index, value)
@@ -135,7 +136,7 @@ class Sudoku constructor(
 
             while (!solver.solve(true)) {
                 println("----------------")
-                val emptyIndices = (0 until sudoku.board.size).filter { sudoku[it] == 0 }
+                val emptyIndices = (0 until sudoku.size).filter { sudoku[it] == 0 }
                 val index = emptyIndices.random()
                 val value = sudoku.candidates.getAt(index).random()
                 solver.internSet(index, value)

@@ -31,12 +31,12 @@ class Cell(
         }
 
     private val fontSizeSingleContent = 0.8 * min(width, height)
-    private val contentWidth = width / game.board.blockSizeX
-    private val contentHeight = height / game.board.blockSizeY
+    private val contentWidth = width / game.blockSizeX
+    private val contentHeight = height / game.blockSizeY
     private val fontSizeMultiContent = 0.8 * min(width, height) / max(
-        game.board.blockSizeX, game.board.blockSizeY)
-    private val contentXPadding = (width - fontSizeMultiContent * game.board.blockSizeX) * .4
-    private val contentYPadding = (height - fontSizeMultiContent * game.board.blockSizeY) * .2
+        game.blockSizeX, game.blockSizeY)
+    private val contentXPadding = (width - fontSizeMultiContent * game.blockSizeX) * .4
+    private val contentYPadding = (height - fontSizeMultiContent * game.blockSizeY) * .2
 
     fun draw(value: Int, color: RGBA) {
         removeChild(content)
@@ -55,13 +55,13 @@ class Cell(
         if (candidates.isNotEmpty()) {
             val strings = candidates.associateWith { stringValues[it] }
             content = container {
-                for (i in 0 until game.board.blockSize) {
+                for (i in 0 until game.blockSize) {
                     strings[i + 1]?.let {
                         text (it) {
                             this.color = color
                             fontSize = fontSizeMultiContent
-                            x = contentXPadding + i % game.board.blockSizeX * contentWidth
-                            y = contentYPadding + i / game.board.blockSizeX * contentHeight
+                            x = contentXPadding + i % game.blockSizeX * contentWidth
+                            y = contentYPadding + i / game.blockSizeX * contentHeight
                         }
                     }
                 }

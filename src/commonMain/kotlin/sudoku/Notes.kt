@@ -5,7 +5,7 @@ import kotlin.properties.Delegates
 
 class Notes(
     private val sudoku: Sudoku,
-    notesData: List<List<Int>> = List(sudoku.board.size) { listOf<Int>() }
+    notesData: List<List<Int>> = List(sudoku.size) { listOf<Int>() }
 ): Json.CustomSerializer {
     lateinit var changedCallback: (List<List<Int>>, List<List<Int>>) -> Unit
     private var data by Delegates.observable(notesData) { _, oldValue, newValue ->
@@ -16,7 +16,7 @@ class Notes(
     }
 
     fun clear() {
-        data = List(sudoku.board.size) { listOf<Int>() }
+        data = List(sudoku.size) { listOf<Int>() }
     }
     fun getAt(index: Int) = data[index]
     fun addAt(index: Int, value: Int) {
@@ -35,7 +35,7 @@ class Notes(
     }
     fun adjust(index: Int, value: Int) {
         data = data.mapIndexed { index1: Int, list: List<Int> ->
-            if (index1 in sudoku.board.indexAffects[index]) {
+            if (index1 in sudoku.indexAffects[index]) {
                 list - value
             } else list
         }

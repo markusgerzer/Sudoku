@@ -1,4 +1,4 @@
-import sudoku.Board
+import sudoku.BoardImpl
 import sudoku.Solver
 import sudoku.Sudoku
 import kotlin.test.Test
@@ -7,14 +7,14 @@ import kotlin.test.assertContentEquals
 fun String.toBoard(
     blockSizeX: Int,
     blockSizeY: Int
-): Board {
+): BoardImpl {
     val blockSize = blockSizeX * blockSizeY
     val values = ('0'..'9').toList() + ('A'..'Z').toList().take(blockSize + 1)
     val str = this.filter { it in values }
     val arr = IntArray(blockSize * blockSize) {
         str[it].toString().toInt(blockSize + 1)
     }
-    return Board(blockSizeX, blockSizeY, arr)
+    return BoardImpl(blockSizeX, blockSizeY, arr)
 }
 
 class SolverTest {
@@ -32,7 +32,7 @@ class SolverTest {
         302  001  090
         """.trimIndent()
 
-    private val easyBoard = Board(
+    private val easyBoard = BoardImpl(
         3,
         3,
         intArrayOf(

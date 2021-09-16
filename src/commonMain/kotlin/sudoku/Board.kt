@@ -1,17 +1,33 @@
 package sudoku
 
-import com.soywiz.korio.serialization.json.Json
 
-class Board(
-    val blockSizeX: Int,
-    val blockSizeY: Int,
+interface Board {
+    val blockSizeX: Int
+    val blockSizeY: Int
     val data: IntArray
-    ) : Json.CustomSerializer {
+    val blockSize: Int
+    val size: Int
+    val values: IntRange
+    val partsAtIndex: List<List<Int>>
+    val indicesByRows: List<List<Int>>
+    val indicesByCols: List<List<Int>>
+    val indicesByBlocks: List<List<Int>>
+    val indicesByParts: List<List<Int>>
+    val indexAffects: List<Set<Int>>
+    fun freeIndices() = (0 until size).filter { data[it] == 0 }
+}
 
-    val blockSize = blockSizeX * blockSizeY
-    val size = data.size
 
-    val values = 1..blockSize
+class BoardImpl(
+    override val blockSizeX: Int,
+    override val blockSizeY: Int,
+    override val data: IntArray
+    ) : Board {
+
+    override val blockSize = blockSizeX * blockSizeY
+    override val size = data.size
+
+    override val values = 1..blockSize
 
     init {
         if (blockSize * blockSize != size)
@@ -21,20 +37,20 @@ class Board(
                 throw IllegalArgumentException("Illegal values in game!")
     }
 
-    val partsAtIndex = List(size) { i ->
+    override val partsAtIndex = List(size) { i ->
         val row = i / blockSize
         val col = i % blockSize
         val block = (col / blockSizeX) + blockSizeY * (row / blockSizeY)
         listOf(row, col + blockSize, block + 2 * blockSize)
     }
 
-    val indicesByRows = List(blockSize) { row ->
+    override val indicesByRows = List(blockSize) { row ->
         List(blockSize) { col -> row * blockSize + col }
     }
-    val indicesByCols = List(blockSize) { col ->
+    override val indicesByCols = List(blockSize) { col ->
         List(blockSize) { row -> row * blockSize + col }
     }
-    val indicesByBlocks = List(blockSize) { block ->
+    override val indicesByBlocks = List(blockSize) { block ->
         List(blockSize) { blockIndex ->
             val blockRowN   = block / blockSizeY
             val rowInBlockN = blockIndex / blockSizeX
@@ -45,23 +61,12 @@ class Board(
             rowN * blockSize + colN
         }
     }
-    val indicesByParts = indicesByRows + indicesByCols + indicesByBlocks
+    override val indicesByParts = indicesByRows + indicesByCols + indicesByBlocks
 
-    val indexAffects = List(size) { i ->
+    override val indexAffects = List(size) { i ->
         val set = mutableSetOf<Int>()
         for (part in partsAtIndex[i])
             set.addAll(indicesByParts[part])
         set.toSet()
-    }
-
-    fun freeIndices() = (0 until size).filter { data[it] == 0 }
-
-    private fun toMap() = mapOf(
-        "blockSizeX" to blockSizeX,
-        "blockSizeY" to blockSizeY,
-        "data" to data.toList()
-    )
-    override fun encodeToJson(b: StringBuilder) {
-        Json.stringify(toMap(), b)
     }
 }

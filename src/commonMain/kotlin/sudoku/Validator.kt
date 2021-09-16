@@ -22,7 +22,7 @@ class Validator(private val sudoku: Sudoku) {
             newValue
         )
     }
-    fun isSolved() = failedIndices.isEmpty() && sudoku.board.data.all { it != 0 }
+    fun isSolved() = failedIndices.isEmpty() && sudoku.data.all { it != 0 }
     fun isValid() = failedIndices.isEmpty()
 
     fun reinitialize() {
@@ -36,12 +36,12 @@ class Validator(private val sudoku: Sudoku) {
     private fun validate() {
         val failedIndices = mutableSetOf<Int>()
 
-        for (partIndices in sudoku.board.indicesByParts) {
-            val valueCount = Array(sudoku.board.blockSize + 1) { mutableListOf<Int>() }
+        for (partIndices in sudoku.indicesByParts) {
+            val valueCount = Array(sudoku.blockSize + 1) { mutableListOf<Int>() }
             for (index in partIndices) {
-                valueCount[sudoku.board.data[index]].add(index)
+                valueCount[sudoku.data[index]].add(index)
             }
-            for (i in sudoku.board.values)
+            for (i in sudoku.values)
                 if (valueCount[i].size > 1) failedIndices.addAll(valueCount[i])
         }
         this.failedIndices = failedIndices
@@ -49,13 +49,13 @@ class Validator(private val sudoku: Sudoku) {
 
     fun calcCompletedValues() {
         val completedValues = mutableListOf<Int>()
-        val valueFrequency = IntArray(sudoku.board.blockSize + 1)
+        val valueFrequency = IntArray(sudoku.blockSize + 1)
 
-        for (i in 0 until sudoku.board.size) valueFrequency[sudoku.board.data[i]]++
+        for (i in 0 until sudoku.size) valueFrequency[sudoku.data[i]]++
 
-        val failedValues = failedIndices.toList().map { sudoku.board.data[it] }
+        val failedValues = failedIndices.toList().map { sudoku.data[it] }
         for ((value, count) in valueFrequency.withIndex()) {
-            if (count == sudoku.board.blockSize && value !in failedValues)
+            if (count == sudoku.blockSize && value !in failedValues)
                 completedValues.add(value)
         }
 
