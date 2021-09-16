@@ -52,7 +52,7 @@ fun Container.startGame(
 		println("${Sudoku.storageKey} loading from Storage failed")
 	}
 
-	if (game.board.size == 0)
+	if (game.size == 0)
 		startSplash(width, height)
 	else
 		sudokuGui(width, height, loadFromStorage = true)

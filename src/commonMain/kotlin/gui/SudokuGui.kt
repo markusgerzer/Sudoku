@@ -38,18 +38,18 @@ class SudokuGui(
 
     private val pxCell = if (landscape) {
             min(
-                height / (game.board.blockSize + 1),
-                width / (game.board.blockSize + 5)
+                height / (game.blockSize + 1),
+                width / (game.blockSize + 5)
             )
         } else {
             min(
-                width / (game.board.blockSize + 1),
-                height / (game.board.blockSize + 5)
+                width / (game.blockSize + 1),
+                height / (game.blockSize + 5)
             )
         }
     private val pxPadding = 0.03 * pxCell
-    private val pxBackgroundX = pxCell * game.board.blockSize + pxPadding * (game.board.blockSize + game.board.blockSizeY * 2 + 3)
-    private val pxBackgroundY = pxCell * game.board.blockSize + pxPadding * (game.board.blockSize + game.board.blockSizeX * 2 + 3)
+    private val pxBackgroundX = pxCell * game.blockSize + pxPadding * (game.blockSize + game.blockSizeY * 2 + 3)
+    private val pxBackgroundY = pxCell * game.blockSize + pxPadding * (game.blockSize + game.blockSizeX * 2 + 3)
     private val pxEntryHeight = min(width, height) / 8
 
     private val backgroundCell = solidRect(pxBackgroundX, pxBackgroundY, theme.border) {
@@ -62,14 +62,14 @@ class SudokuGui(
         }
     }
 
-    private val cells = Array(game.board.size) { idx ->
+    private val cells = Array(game.size) { idx ->
         cell(pxCell, pxCell) {
-            val col = idx % game.board.blockSize
-            val row = idx / game.board.blockSize
+            val col = idx % game.blockSize
+            val row = idx / game.blockSize
             x = backgroundCell.x + 3 * pxPadding + col * (pxCell +
-                    pxPadding) + col / game.board.blockSizeX * pxPadding * 2
+                    pxPadding) + col / game.blockSizeX * pxPadding * 2
             y = backgroundCell.y + 3 * pxPadding + row * (pxCell +
-                    pxPadding) + row / game.board.blockSizeY * pxPadding * 2
+                    pxPadding) + row / game.blockSizeY * pxPadding * 2
 
             onClick {
                 val value =
@@ -96,28 +96,28 @@ class SudokuGui(
 
         if (editorMode)
             game.candidates.changedCallback = { oldCandidates, newCandidates ->
-                for (i in 0 until game.board.size)
+                for (i in 0 until game.size)
                     if (oldCandidates[i] != newCandidates[i])
                         cells[i].draw(i)
             }
 
         game.notes.changedCallback = { oldNotes, newNotes ->
-            for (i in 0 until game.board.size)
+            for (i in 0 until game.size)
                 if (oldNotes[i] != newNotes[i])
                     cells[i].draw(i)
         }
     }
 
-    private val pxButton = (backgroundCell.width - (game.board.blockSize - 1) * pxPadding) / (game.board.blockSize)
+    private val pxButton = (backgroundCell.width - (game.blockSize - 1) * pxPadding) / (game.blockSize)
 
     inner class ValueButtonConfig {
         val width =
             if (landscape) pxButton
-            else (backgroundCell.width / game.board.blockSize * game.board.blockSize)
+            else (backgroundCell.width / game.blockSize * game.blockSize)
         val height =
-            if (landscape) (backgroundCell.height / game.board.blockSize * game.board.blockSize)
+            if (landscape) (backgroundCell.height / game.blockSize * game.blockSize)
             else pxButton
-        val strings = Cell.stringValues.take(game.board.blockSize + 1).drop(1)
+        val strings = Cell.stringValues.take(game.blockSize + 1).drop(1)
         val direction = if (landscape) VERTICAL else HORIZONTAL
         val x =
             if (landscape) backgroundCell.x + backgroundCell.width + pxButton
@@ -240,7 +240,7 @@ class SudokuGui(
     }
 
     private fun solveGame() {
-        for (i in 0 until game.board.size)
+        for (i in 0 until game.size)
             if (game[i] != 0) game.immutableIndices.add(i)
 
         val solver = Solver(game)
@@ -261,7 +261,7 @@ class SudokuGui(
     }
 
     private fun tipGame() {
-        val index = game.board.freeIndices().random()
+        val index = game.freeIndices().random()
         val value = game.solvedBoard?.get(index)
         game[index] = value ?: 0
         cells[index].draw(index)
@@ -269,14 +269,14 @@ class SudokuGui(
 
     private fun resetGame() {
         game.reset()
-        List(game.board.size) { listOf<Int>() }
-        for (i in 0 until game.board.size)
+        List(game.size) { listOf<Int>() }
+        for (i in 0 until game.size)
             cells[i].failure = false
         drawCells()
     }
 
     private fun drawCells() {
-        for (i in 0 until game.board.size)
+        for (i in 0 until game.size)
             cells[i].draw(i)
     }
 
@@ -284,11 +284,11 @@ class SudokuGui(
         val color =
             when (index) {
                 in game.immutableIndices -> theme.fontDefault
-                in game.board.freeIndices() -> theme.fontCandidates
+                in game.freeIndices() -> theme.fontCandidates
                 else -> theme.fontVariable
             }
 
-        if (index in game.board.freeIndices()) {
+        if (index in game.freeIndices()) {
             if (editorMode && noteButton.status == Button.Status.ON)
                 draw(game.candidates.getAt(index), color)
             else
