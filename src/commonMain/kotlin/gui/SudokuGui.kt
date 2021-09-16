@@ -215,15 +215,17 @@ class SudokuGui(
         }.addTo(this)
 
     init {
-        game.validator.solvedCallback = {
-            popUpMenu(this, pxEntryHeight) {
-                defaultCallback = ::exitGame
-                entries = listOf(
-                    MenuEntry(
-                        `$`.SudokuGui_solvedMsg,
-                        ::exitGame
+        if (!editorMode) {
+            game.validator.solvedCallback = {
+                popUpMenu(this, pxEntryHeight) {
+                    defaultCallback = ::exitGame
+                    entries = listOf(
+                        MenuEntry(
+                            `$`.SudokuGui_solvedMsg,
+                            ::exitGame
+                        )
                     )
-                )
+                }
             }
         }
 

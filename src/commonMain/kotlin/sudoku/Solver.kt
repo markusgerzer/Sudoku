@@ -13,7 +13,7 @@ class Solver(private val sudoku: Sudoku) {
 
     fun solve(oneSolution: Boolean = true): Boolean {
         savedBoard = null
-        return if (try {
+        return (if (try {
                 solveLoop()
             } catch (e: MultiSolution) {
                 if (oneSolution) {
@@ -26,15 +26,17 @@ class Solver(private val sudoku: Sudoku) {
             }) {
             sudoku.solvedBoard = sudoku.board.data.toList()
             true
-        } else false
+        } else false).also {
+            println(if (it) "T" else "N")
+        }
     }
 
     private tailrec fun solveLoop(): Boolean = when {
-        sudoku.validator.isSolved() -> { println("Solved"); true }
+        sudoku.validator.isSolved() -> { print("t"); true }
         solve1() -> { solveLoop() }
         solve2() -> { solveLoop() }
         solveBacktrack() -> { solveLoop() }
-        else -> { println("!!!"); false }
+        else -> { print("n"); false }
     }
 
     /**
@@ -102,7 +104,6 @@ class Solver(private val sudoku: Sudoku) {
 
         return if (result == null) false
         else {
-            print(".")
             for (i in sudoku.board.data.indices) { sudoku.board.data[i] = result[i] }
             true
         }
