@@ -6,7 +6,7 @@ interface Board {
     val blockSizeY: Int
     val data: IntArray
     val blockSize: Int
-    val size: Int
+    val size get() = data.size
     val values: IntRange
     val partsAtIndex: List<List<Int>>
     val indicesByRows: List<List<Int>>
@@ -18,15 +18,13 @@ interface Board {
 }
 
 
-class BoardImpl(
+open class BoardImpl(
     override val blockSizeX: Int,
     override val blockSizeY: Int,
     override val data: IntArray
     ) : Board {
 
     override val blockSize = blockSizeX * blockSizeY
-    override val size = data.size
-
     override val values = 1..blockSize
 
     init {

@@ -5,16 +5,15 @@ import storage.Storage
 
 
 class Sudoku constructor(
-    board: Board,
-    notesData: List<List<Int>> = List(board.data.size) { listOf<Int>() }
-) : Storage.SelfStorable, Board by board {
+    private val boardValidator: BoardValidator,
+    notesData: List<List<Int>> = List(boardValidator.size) { listOf<Int>() }
+) : Storage.SelfStorable, BoardValidator by boardValidator {
 
     val immutableIndices = mutableSetOf<Int>()
     var solvedBoard: List<Int>? = null
         internal set
 
     val candidates = Candidates(this)
-    val validator = Validator(this)
     val notes = Notes(this, notesData)
 
     operator fun get(index: Int) = data[index]
@@ -24,12 +23,12 @@ class Sudoku constructor(
         if (value !in values && value != 0) throw IllegalArgumentException("Value not valid!")
         data[index] = value
         reinitialize()
-        if (validator.isValid()) notes.adjust(index, value)
+        if (isValid()) notes.adjust(index, value)
         saveToStorage()
     }
 
-    fun reinitialize() {
-        validator.reinitialize()
+    override fun reinitialize() {
+        boardValidator.reinitialize()
         candidates.reCalc()
     }
 
@@ -61,11 +60,11 @@ class Sudoku constructor(
         const val storageKey = "Sudoku"
 
         fun dummySudoku() =
-            Sudoku(BoardImpl(0, 0, IntArray(0)))
+            Sudoku(BoardValidatorImpl(0, 0, IntArray(0)))
 
         fun blankSudoku(blockSizeX: Int, blockSizeY: Int) =
             Sudoku(
-                BoardImpl(
+                BoardValidatorImpl(
                     blockSizeX,
                     blockSizeY,
                     IntArray(blockSizeX * blockSizeY * blockSizeX * blockSizeY)
@@ -77,7 +76,7 @@ class Sudoku constructor(
             val blockSizeX = map["blockSizeX"] as Int
             val blockSizeY = map["blockSizeY"] as Int
             val boardData = (map["data"] as List<Int>).toIntArray()
-            val board = BoardImpl(blockSizeX, blockSizeY, boardData)
+            val board = BoardValidatorImpl(blockSizeX, blockSizeY, boardData)
             val solvedBoard = map["solvedBoard"] as List<Int>?
             val immutableIndices = map["immutableIndices"] as List<Int>
             val notesData = map["notes"] as List<List<Int>>
@@ -127,7 +126,7 @@ class Sudoku constructor(
                     solver.internSet(index, value)
                 }
             } while (
-                !sudoku.validator.isValid() &&
+                !sudoku.isValid() &&
                 !solver.solve(false) &&
                 sudoku.immutableIndices.addAll(randomIndices)
             )

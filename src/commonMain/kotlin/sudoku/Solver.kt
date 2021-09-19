@@ -32,7 +32,7 @@ class Solver(private val sudoku: Sudoku) {
     }
 
     private tailrec fun solveLoop(): Boolean = when {
-        sudoku.validator.isSolved() -> { print("t"); true }
+        sudoku.isSolved() -> { print("t"); true }
         solve1() -> { solveLoop() }
         solve2() -> { solveLoop() }
         solveBacktrack() -> { solveLoop() }

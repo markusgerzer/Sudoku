@@ -87,7 +87,7 @@ class SudokuGui(
         }
     }
     init {
-        game.validator.failedIndicesCallback = { oldFailedIndices, newFailedIndices ->
+        game.failedIndicesCallback = { oldFailedIndices, newFailedIndices ->
             for (index in oldFailedIndices - newFailedIndices)
                 cells[index].failure = false
             for (index in newFailedIndices)
@@ -139,7 +139,7 @@ class SudokuGui(
             init {
                 set(buttons[currentIndex()])
 
-                game.validator.completedValuesCallback = {
+                game.completedValuesCallback = {
                         oldCompletedValues, newCompletedValues ->
                     for (value in oldCompletedValues - newCompletedValues - 0)
                         buttons[value - 1].mark =
@@ -216,7 +216,7 @@ class SudokuGui(
 
     init {
         if (!editorMode) {
-            game.validator.solvedCallback = {
+            game.solvedCallback = {
                 popUpMenu(this, pxEntryHeight) {
                     defaultCallback = ::exitGame
                     entries = listOf(
