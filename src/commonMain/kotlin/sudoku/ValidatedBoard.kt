@@ -3,7 +3,7 @@ package sudoku
 import kotlin.properties.Delegates
 
 
-interface BoardValidator: Board {
+interface ValidatedBoard: Board {
     var failedIndices: Set<Int>
     var completedValues: List<Int>
     var failedIndicesCallback: (Set<Int>, Set<Int>) -> Unit
@@ -16,11 +16,11 @@ interface BoardValidator: Board {
 }
 
 
-class BoardValidatorImpl(
+class ValidatedBoardImpl(
     blockSizeX: Int,
     blockSizeY: Int,
     data: IntArray
-): BoardValidator, BoardImpl(blockSizeX, blockSizeY, data) {
+): ValidatedBoard, BoardImpl(blockSizeX, blockSizeY, data) {
     override lateinit var failedIndicesCallback: (Set<Int>, Set<Int>) -> Unit
     override lateinit var solvedCallback: () -> Unit
     override lateinit var completedValuesCallback: (List<Int>, List<Int>) -> Unit

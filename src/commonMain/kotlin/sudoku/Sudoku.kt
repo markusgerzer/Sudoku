@@ -5,15 +5,15 @@ import storage.Storage
 
 
 class Sudoku constructor(
-    private val boardValidator: BoardValidator,
-    notesData: List<List<Int>> = List(boardValidator.size) { listOf<Int>() }
-) : Storage.SelfStorable, BoardValidator by boardValidator {
+    private val validatedBoard: ValidatedBoard,
+    val candidates:Candidates = Candidates(validatedBoard),
+    notesData: List<List<Int>> = List(validatedBoard.size) { listOf<Int>() }
+) : Storage.SelfStorable, ValidatedBoard by validatedBoard {
 
     val immutableIndices = mutableSetOf<Int>()
     var solvedBoard: List<Int>? = null
         internal set
 
-    val candidates = Candidates(this)
     val notes = Notes(this, notesData)
 
     operator fun get(index: Int) = data[index]
@@ -28,7 +28,7 @@ class Sudoku constructor(
     }
 
     override fun reinitialize() {
-        boardValidator.reinitialize()
+        validatedBoard.reinitialize()
         candidates.reCalc()
     }
 
@@ -60,11 +60,11 @@ class Sudoku constructor(
         const val storageKey = "Sudoku"
 
         fun dummySudoku() =
-            Sudoku(BoardValidatorImpl(0, 0, IntArray(0)))
+            Sudoku(ValidatedBoardImpl(0, 0, IntArray(0)))
 
         fun blankSudoku(blockSizeX: Int, blockSizeY: Int) =
             Sudoku(
-                BoardValidatorImpl(
+                ValidatedBoardImpl(
                     blockSizeX,
                     blockSizeY,
                     IntArray(blockSizeX * blockSizeY * blockSizeX * blockSizeY)
@@ -76,12 +76,12 @@ class Sudoku constructor(
             val blockSizeX = map["blockSizeX"] as Int
             val blockSizeY = map["blockSizeY"] as Int
             val boardData = (map["data"] as List<Int>).toIntArray()
-            val board = BoardValidatorImpl(blockSizeX, blockSizeY, boardData)
+            val board = ValidatedBoardImpl(blockSizeX, blockSizeY, boardData)
             val solvedBoard = map["solvedBoard"] as List<Int>?
             val immutableIndices = map["immutableIndices"] as List<Int>
             val notesData = map["notes"] as List<List<Int>>
 
-            return Sudoku(board, notesData).apply{
+            return Sudoku(board, notesData = notesData).apply{
                 this.solvedBoard = solvedBoard
                 this.immutableIndices.addAll(immutableIndices)
             }
