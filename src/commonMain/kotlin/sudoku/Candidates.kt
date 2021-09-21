@@ -1,10 +1,10 @@
 package sudoku
 
-import kotlin.properties.Delegates
+import kotlin.properties.Delegates.observable
 
 class Candidates(private val board: Board) {
     lateinit var changedCallback: (Array<List<Int>>, Array<List<Int>>) -> Unit
-    private var data by Delegates.observable(
+    private var data by observable(
         Array(
             board.size
         ) { listOf<Int>() }) { _, oldValue, newValue ->

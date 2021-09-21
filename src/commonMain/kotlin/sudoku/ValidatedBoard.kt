@@ -1,11 +1,12 @@
 package sudoku
 
-import kotlin.properties.Delegates
+import kotlin.properties.Delegates.observable
 
 
 interface ValidatedBoard: Board {
-    var failedIndices: Set<Int>
-    var completedValues: List<Int>
+    val failedIndices: Set<Int>
+    val completedValues: List<Int>
+
     var failedIndicesCallback: (Set<Int>, Set<Int>) -> Unit
     var solvedCallback: () -> Unit
     var completedValuesCallback: (List<Int>, List<Int>) -> Unit
@@ -25,14 +26,15 @@ class ValidatedBoardImpl(
     override lateinit var solvedCallback: () -> Unit
     override lateinit var completedValuesCallback: (List<Int>, List<Int>) -> Unit
 
-    override var failedIndices by Delegates.observable(setOf<Int>()) { _, oldValue, newValue ->
+    override var failedIndices by observable(setOf<Int>()) { _, oldValue, newValue ->
         if (::failedIndicesCallback.isInitialized) failedIndicesCallback(
             oldValue,
             newValue
         )
     }
+        private set
 
-    override var completedValues by Delegates.observable(
+    override var completedValues by observable(
         listOf<Int>()
     ) { _, oldValue, newValue ->
         if (::completedValuesCallback.isInitialized) completedValuesCallback(
@@ -40,6 +42,7 @@ class ValidatedBoardImpl(
             newValue
         )
     }
+        private set
 
     override fun reinitialize() {
         validate()
