@@ -7,12 +7,10 @@ class Notes(
     private val sudoku: Sudoku,
     notesData: List<List<Int>> = List(sudoku.size) { listOf<Int>() }
 ): Json.CustomSerializer {
-    lateinit var changedCallback: (List<List<Int>>, List<List<Int>>) -> Unit
+    val changedCallback = mutableListOf<(List<List<Int>>, List<List<Int>>) -> Unit>()
     private var data by Delegates.observable(notesData) { _, oldValue, newValue ->
-        if (::changedCallback.isInitialized) changedCallback(
-            oldValue,
-            newValue
-        )
+        for (callback in changedCallback)
+            callback(oldValue, newValue)
     }
 
     fun clear() {

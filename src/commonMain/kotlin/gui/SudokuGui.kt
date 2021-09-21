@@ -101,7 +101,7 @@ class SudokuGui(
                         cells[i].draw(i)
             }
 
-        game.notes.changedCallback = { oldNotes, newNotes ->
+        game.notes.changedCallback.add { oldNotes, newNotes ->
             for (i in 0 until game.size)
                 if (oldNotes[i] != newNotes[i])
                     cells[i].draw(i)
