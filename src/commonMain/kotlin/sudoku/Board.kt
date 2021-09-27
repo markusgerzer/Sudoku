@@ -4,9 +4,9 @@ package sudoku
 interface Board {
     val blockSizeX: Int
     val blockSizeY: Int
-    val data: IntArray
+    val boardArray: IntArray
     val blockSize: Int
-    val size get() = data.size
+    val size: Int
     val values: IntRange
     val partsAtIndex: List<List<Int>>
     val indicesByRows: List<List<Int>>
@@ -14,23 +14,24 @@ interface Board {
     val indicesByBlocks: List<List<Int>>
     val indicesByParts: List<List<Int>>
     val indexAffects: List<Set<Int>>
-    fun freeIndices() = (0 until size).filter { data[it] == 0 }
+    fun freeIndices() = (0 until size).filter { boardArray[it] == 0 }
 }
 
 
 open class BoardImpl(
-    override val blockSizeX: Int,
-    override val blockSizeY: Int,
-    override val data: IntArray
+    final override val blockSizeX: Int,
+    final override val blockSizeY: Int,
+    final override val boardArray: IntArray
     ) : Board {
 
-    override val blockSize = blockSizeX * blockSizeY
-    override val values = 1..blockSize
+    final override val size get() = boardArray.size
+    final override val blockSize = blockSizeX * blockSizeY
+    final override val values = 1..blockSize
 
     init {
         if (blockSize * blockSize != size)
             throw IllegalArgumentException("Size Error")
-        for (field in data)
+        for (field in boardArray)
             if (field != 0 && field !in values)
                 throw IllegalArgumentException("Illegal values in game!")
     }
@@ -42,13 +43,13 @@ open class BoardImpl(
         listOf(row, col + blockSize, block + 2 * blockSize)
     }
 
-    override val indicesByRows = List(blockSize) { row ->
+    final override val indicesByRows = List(blockSize) { row ->
         List(blockSize) { col -> row * blockSize + col }
     }
-    override val indicesByCols = List(blockSize) { col ->
+    final override val indicesByCols = List(blockSize) { col ->
         List(blockSize) { row -> row * blockSize + col }
     }
-    override val indicesByBlocks = List(blockSize) { block ->
+    final override val indicesByBlocks = List(blockSize) { block ->
         List(blockSize) { blockIndex ->
             val blockRowN   = block / blockSizeY
             val rowInBlockN = blockIndex / blockSizeX

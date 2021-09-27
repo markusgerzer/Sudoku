@@ -11,7 +11,7 @@ interface ValidatedBoard: Board {
     var solvedCallback: () -> Unit
     var completedValuesCallback: (List<Int>, List<Int>) -> Unit
 
-    fun isSolved() = failedIndices.isEmpty() && data.all { it != 0 }
+    fun isSolved() = failedIndices.isEmpty() && boardArray.all { it != 0 }
     fun isValid() = failedIndices.isEmpty()
     fun reinitialize()
 }
@@ -57,7 +57,7 @@ class ValidatedBoardImpl(
         for (partIndices in indicesByParts) {
             val valueCount = Array(blockSize + 1) { mutableListOf<Int>() }
             for (index in partIndices) {
-                valueCount[data[index]].add(index)
+                valueCount[boardArray[index]].add(index)
             }
             for (i in values)
                 if (valueCount[i].size > 1) failedIndices.addAll(valueCount[i])
@@ -69,9 +69,9 @@ class ValidatedBoardImpl(
         val completedValues = mutableListOf<Int>()
         val valueFrequency = IntArray(blockSize + 1)
 
-        for (i in 0 until size) valueFrequency[data[i]]++
+        for (i in 0 until size) valueFrequency[boardArray[i]]++
 
-        val failedValues = failedIndices.toList().map { data[it] }
+        val failedValues = failedIndices.toList().map { boardArray[it] }
         for ((value, count) in valueFrequency.withIndex()) {
             if (count == blockSize && value !in failedValues)
                 completedValues.add(value)

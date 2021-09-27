@@ -1,20 +1,20 @@
-import sudoku.BoardImpl
 import sudoku.Solver
 import sudoku.Sudoku
+import sudoku.ValidatedBoardImpl
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 
 fun String.toBoard(
     blockSizeX: Int,
     blockSizeY: Int
-): BoardImpl {
+): ValidatedBoardImpl {
     val blockSize = blockSizeX * blockSizeY
     val values = ('0'..'9').toList() + ('A'..'Z').toList().take(blockSize + 1)
     val str = this.filter { it in values }
     val arr = IntArray(blockSize * blockSize) {
         str[it].toString().toInt(blockSize + 1)
     }
-    return BoardImpl(blockSizeX, blockSizeY, arr)
+    return ValidatedBoardImpl(blockSizeX, blockSizeY, arr)
 }
 
 class SolverTest {
@@ -32,7 +32,7 @@ class SolverTest {
         302  001  090
         """.trimIndent()
 
-    private val easyBoard = BoardImpl(
+    private val easyBoard = ValidatedBoardImpl(
         3,
         3,
         intArrayOf(
@@ -165,12 +165,12 @@ class SolverTest {
     fun testStringToBord() {
         assertContentEquals(
             easyBoardSolved,
-            strEasyBoardSolved.toBoard(3, 3).data.toList()
+            strEasyBoardSolved.toBoard(3, 3).boardArray.toList()
         )
 
         assertContentEquals(
-            easyBoard.data,
-            strEasyBoard.toBoard(3, 3).data
+            easyBoard.boardArray,
+            strEasyBoard.toBoard(3, 3).boardArray
         )
     }
 
@@ -191,7 +191,7 @@ class SolverTest {
         val solver = Solver(sudoku)
 
         solver.solve()
-        assertContentEquals(normalBoardSolved.data.toList(), sudoku.solvedBoard)
+        assertContentEquals(normalBoardSolved.boardArray.toList(), sudoku.solvedBoard)
     }
 
 
@@ -201,7 +201,7 @@ class SolverTest {
         val solver = Solver(sudoku)
 
         solver.solve()
-        assertContentEquals(difficultBoardSolved.data.toList(), sudoku.solvedBoard)
+        assertContentEquals(difficultBoardSolved.boardArray.toList(), sudoku.solvedBoard)
     }
 
 
@@ -211,6 +211,6 @@ class SolverTest {
         val solver = Solver(sudoku)
 
         solver.solve()
-        assertContentEquals(professionalBoardSolved.data.toList(), sudoku.solvedBoard)
+        assertContentEquals(professionalBoardSolved.boardArray.toList(), sudoku.solvedBoard)
     }
 }

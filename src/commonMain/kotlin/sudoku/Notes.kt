@@ -4,8 +4,8 @@ import com.soywiz.korio.serialization.json.Json
 import kotlin.properties.Delegates
 
 class Notes(
-    private val sudoku: Sudoku,
-    notesData: List<List<Int>> = List(sudoku.size) { listOf<Int>() }
+    private val board: Board,
+    notesData: List<List<Int>> = List(board.size) { listOf<Int>() }
 ): Json.CustomSerializer {
     val changedCallback = mutableListOf<(List<List<Int>>, List<List<Int>>) -> Unit>()
     private var data by Delegates.observable(notesData) { _, oldValue, newValue ->
@@ -14,7 +14,7 @@ class Notes(
     }
 
     fun clear() {
-        data = List(sudoku.size) { listOf<Int>() }
+        data = List(board.size) { listOf<Int>() }
     }
     fun getAt(index: Int) = data[index]
     fun addAt(index: Int, value: Int) {
@@ -22,18 +22,16 @@ class Notes(
             if (index == index1) list + value
             else list
         }
-        sudoku.saveToStorage()
     }
     fun delAt(index: Int, value: Int) {
         data = data.mapIndexed { index1: Int, list: List<Int> ->
             if (index == index1) list - value
             else list
         }
-        sudoku.saveToStorage()
     }
     fun adjust(index: Int, value: Int) {
         data = data.mapIndexed { index1: Int, list: List<Int> ->
-            if (index1 in sudoku.indexAffects[index]) {
+            if (index1 in board.indexAffects[index]) {
                 list - value
             } else list
         }

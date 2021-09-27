@@ -6,7 +6,6 @@ import storage.Storage
 
 class Sudoku constructor(
     private val validatedBoard: ValidatedBoard,
-    val candidates:Candidates = Candidates(validatedBoard),
     notesData: List<List<Int>> = List(validatedBoard.size) { listOf<Int>() }
 ) : Storage.SelfStorable, ValidatedBoard by validatedBoard {
 
@@ -14,17 +13,22 @@ class Sudoku constructor(
     var solvedBoard: List<Int>? = null
         internal set
 
-    val notes = Notes(this, notesData)
+    val candidates:Candidates = Candidates(validatedBoard)
+    val notes = Notes(validatedBoard, notesData).also {
+        it.changedCallback.add { _, _ ->
+            saveToStorage()
+        }
+    }
 
-    operator fun get(index: Int) = data[index]
+    operator fun get(index: Int) = boardArray[index]
 
     operator fun set(index: Int, value: Int) {
         if (index in immutableIndices) return
         if (value !in values && value != 0) throw IllegalArgumentException("Value not valid!")
-        data[index] = value
+        boardArray[index] = value
         reinitialize()
         if (isValid()) notes.adjust(index, value)
-        saveToStorage()
+        else saveToStorage()
     }
 
     override fun reinitialize() {
@@ -35,7 +39,7 @@ class Sudoku constructor(
     fun reset() {
         for (i in 0 until size)
             if (i !in immutableIndices)
-                data[i] = 0
+                boardArray[i] = 0
         candidates.reCalc()
         notes.clear()
     }
@@ -44,7 +48,7 @@ class Sudoku constructor(
     private fun toMap() = mapOf(
         "blockSizeX" to blockSizeX,
         "blockSizeY" to blockSizeY,
-        "data" to data.toList(),
+        "data" to boardArray.toList(),
         "solvedBoard" to solvedBoard,
         "immutableIndices" to immutableIndices,
         "notes" to notes

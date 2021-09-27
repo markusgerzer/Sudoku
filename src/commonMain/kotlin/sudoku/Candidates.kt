@@ -23,7 +23,7 @@ class Candidates(private val board: Board) {
 
     fun reCalc() {
         data = Array(board.size) {
-            if (board.data[it] == 0) board.values - noCandidatesAt(it)
+            if (board.boardArray[it] == 0) board.values - noCandidatesAt(it)
             else listOf()
         }
     }
@@ -35,7 +35,7 @@ class Candidates(private val board: Board) {
     }
 
     private fun valuesInPart(n: Int) = board.indicesByParts[n]
-        .map { board.data[it] }
+        .map { board.boardArray[it] }
         .filter { it != 0 }
 
     private fun noCandidatesAt(index: Int): List<Int> {

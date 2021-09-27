@@ -7,7 +7,7 @@ class Solver(private val sudoku: Sudoku) {
     private var savedBoard: IntArray? = null
 
     internal fun internSet(index: Int, value: Int) {
-        sudoku.data[index] = value
+        sudoku.boardArray[index] = value
         sudoku.candidates.adjust(index, value)
     }
 
@@ -18,13 +18,13 @@ class Solver(private val sudoku: Sudoku) {
             } catch (e: MultiSolution) {
                 if (oneSolution) {
                     savedBoard?.forEachIndexed { index, value ->
-                        sudoku.data[index] = value
+                        sudoku.boardArray[index] = value
                     }
                     sudoku.candidates.reCalc()
                     false
                 } else true
             }) {
-            sudoku.solvedBoard = sudoku.data.toList()
+            sudoku.solvedBoard = sudoku.boardArray.toList()
             true
         } else false).also {
             println(if (it) "T" else "N")
@@ -78,33 +78,33 @@ class Solver(private val sudoku: Sudoku) {
 
     private fun solveBacktrack(): Boolean {
         print("B")
-        if (savedBoard == null) savedBoard = sudoku.data.copyOf()
+        if (savedBoard == null) savedBoard = sudoku.boardArray.copyOf()
 
         var result: IntArray? = null
         var lowestCandidatesSize = sudoku.blockSize
         var backtrackIndex = 0
 
         for (i in 0 until sudoku.size) {
-            if (sudoku.data[i] == 0 && sudoku.candidates.getAt(i).size < lowestCandidatesSize) {
+            if (sudoku.boardArray[i] == 0 && sudoku.candidates.getAt(i).size < lowestCandidatesSize) {
                 backtrackIndex = i
                 lowestCandidatesSize = sudoku.candidates.getAt(i).size
             }
         }
 
-        val currentSavedBoard = sudoku.data.copyOf()
+        val currentSavedBoard = sudoku.boardArray.copyOf()
         for (value in sudoku.candidates.getAt(backtrackIndex)) {
             internSet(backtrackIndex, value)
             if (solveLoop()) {
-                if (result == null) result = sudoku.data.copyOf()
+                if (result == null) result = sudoku.boardArray.copyOf()
                 else throw MultiSolution()
             }
-            for (i in sudoku.data.indices) sudoku.data[i] = currentSavedBoard[i]
+            for (i in sudoku.boardArray.indices) sudoku.boardArray[i] = currentSavedBoard[i]
             sudoku.candidates.reCalc()
         }
 
         return if (result == null) false
         else {
-            for (i in sudoku.data.indices) { sudoku.data[i] = result[i] }
+            for (i in sudoku.boardArray.indices) { sudoku.boardArray[i] = result[i] }
             true
         }
     }
