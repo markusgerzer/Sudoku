@@ -244,7 +244,7 @@ class SudokuGui(
             if (game[i] != 0) game.immutableIndices.add(i)
 
         val solver = Solver(game)
-        if (!solver.solve(true)) {
+        if (!solver.uniqueSolution.solve()) {
             game.reset()
             game.immutableIndices.clear()
 
