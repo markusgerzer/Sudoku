@@ -23,8 +23,8 @@ class Sudoku constructor(
     operator fun get(index: Int) = boardArray[index]
 
     operator fun set(index: Int, value: Int) {
-        if (index in immutableIndices) return
         if (value !in values && value != 0) throw IllegalArgumentException("Value not valid!")
+        if (index in immutableIndices) return
         boardArray[index] = value
         reinitialize()
         if (isValid()) notes.adjust(index, value)
@@ -48,7 +48,7 @@ class Sudoku constructor(
     private fun toMap() = mapOf(
         "blockSizeX" to blockSizeX,
         "blockSizeY" to blockSizeY,
-        "data" to boardArray.toList(),
+        "boardArray" to boardArray.toList(),
         "solvedBoard" to solvedBoard,
         "immutableIndices" to immutableIndices,
         "notes" to notes
@@ -79,8 +79,8 @@ class Sudoku constructor(
             val map = Storage.loadFromStorage(storageKey) as Map<*, *>
             val blockSizeX = map["blockSizeX"] as Int
             val blockSizeY = map["blockSizeY"] as Int
-            val boardData = (map["data"] as List<Int>).toIntArray()
-            val board = ValidatedBoardImpl(blockSizeX, blockSizeY, boardData)
+            val boardArray = (map["boardArray"] as List<Int>).toIntArray()
+            val board = ValidatedBoardImpl(blockSizeX, blockSizeY, boardArray)
             val solvedBoard = map["solvedBoard"] as List<Int>?
             val immutableIndices = map["immutableIndices"] as List<Int>
             val notesData = map["notes"] as List<List<Int>>
@@ -96,14 +96,14 @@ class Sudoku constructor(
         fun createSudoku1(blockSizeX: Int, blockSizeY: Int): Sudoku {
             val sudoku = blankSudoku(blockSizeX, blockSizeY)
             val solver = Solver(sudoku)
-            while (!solver.solve(true)) {
+            while (!solver.uniqueSolution.solve()) {
                 println("----------------")
                 val emptyIndices = (0 until sudoku.size).filter { sudoku[it] == 0 }
                 val index = emptyIndices.random()
                 val value = sudoku.candidates.getAt(index).random()
                 solver.internSet(index, value)
 
-                if(solver.solve(false)) {
+                if(solver.firstSolution.solve()) {
                     sudoku.immutableIndices.add(index)
                 } else {
                     solver.internSet(index, 0)
@@ -131,20 +131,20 @@ class Sudoku constructor(
                 }
             } while (
                 !sudoku.isValid() &&
-                !solver.solve(false) &&
+                !solver.firstSolution.solve() &&
                 sudoku.immutableIndices.addAll(randomIndices)
             )
             sudoku.reset()
 
 
-            while (!solver.solve(true)) {
+            while (!solver.uniqueSolution.solve()) {
                 println("----------------")
                 val emptyIndices = (0 until sudoku.size).filter { sudoku[it] == 0 }
                 val index = emptyIndices.random()
                 val value = sudoku.candidates.getAt(index).random()
                 solver.internSet(index, value)
 
-                if(solver.solve(false)) {
+                if(solver.firstSolution.solve()) {
                     sudoku.immutableIndices.add(index)
                 } else {
                     solver.internSet(index, 0)

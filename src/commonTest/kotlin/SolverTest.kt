@@ -1,8 +1,7 @@
-import sudoku.Solver
-import sudoku.Sudoku
-import sudoku.ValidatedBoardImpl
+import sudoku.*
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
+import kotlin.test.assertEquals
 
 fun String.toBoard(
     blockSizeX: Int,
@@ -180,7 +179,7 @@ class SolverTest {
         val sudoku = Sudoku(easyBoard)
         val solver = Solver(sudoku)
 
-        solver.solve()
+        solver.firstSolution.solve()
         assertContentEquals(easyBoardSolved, sudoku.solvedBoard)
     }
 
@@ -190,7 +189,7 @@ class SolverTest {
         val sudoku = Sudoku(normalBoard)
         val solver = Solver(sudoku)
 
-        solver.solve()
+        solver.firstSolution.solve()
         assertContentEquals(normalBoardSolved.boardArray.toList(), sudoku.solvedBoard)
     }
 
@@ -201,6 +200,7 @@ class SolverTest {
         val solver = Solver(sudoku)
 
         solver.solve()
+        solver.firstSolution.solve()
         assertContentEquals(difficultBoardSolved.boardArray.toList(), sudoku.solvedBoard)
     }
 
@@ -210,7 +210,29 @@ class SolverTest {
         val sudoku = Sudoku(professionalBoard)
         val solver = Solver(sudoku)
 
-        solver.solve()
+        solver.firstSolution.solve()
         assertContentEquals(professionalBoardSolved.boardArray.toList(), sudoku.solvedBoard)
+    }
+}
+
+
+class SolverTest2 {
+    val board = """
+        00 00
+        00 00
+        
+        00 00
+        00 00
+    """.trimIndent().toBoard(2, 2)
+
+    @Test
+    fun test1() {
+        val sudoku = Sudoku(board)
+        assertEquals(false, Solver(sudoku).uniqueSolution.solve())
+        println(sudoku)
+
+        val sudoku2 = Sudoku(board)
+        assertEquals(true, Solver(sudoku2).firstSolution.solve())
+        println(sudoku2)
     }
 }

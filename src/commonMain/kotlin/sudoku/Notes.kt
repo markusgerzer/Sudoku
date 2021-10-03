@@ -37,6 +37,8 @@ class Notes(
         }
     }
 
+    override fun toString() = data.toString()
+
     override fun encodeToJson(b: StringBuilder) {
         Json.stringify(data, b)
     }
