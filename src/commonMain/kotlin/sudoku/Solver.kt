@@ -117,7 +117,6 @@ class Solver (private val sudoku: Sudoku): SolverI {
      * Find unique Solution
      * Methode solve() tests for more solutions and
      * returns true only if exact one solution is found.
-     *
      */
     val uniqueSolution = object : SolverI{
         override fun solve(): Boolean = solve(::uniqueSolutionBacktrack, ::uniqueSolutionSolveImpl)
