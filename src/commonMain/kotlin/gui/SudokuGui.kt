@@ -269,7 +269,7 @@ class SudokuGui(
 
     private fun resetGame() {
         game.reset()
-        List(game.size) { listOf<Int>() }
+        game.notes.clear()
         for (i in 0 until game.size)
             cells[i].failure = false
         drawCells()

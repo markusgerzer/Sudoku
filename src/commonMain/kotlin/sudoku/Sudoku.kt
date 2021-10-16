@@ -41,7 +41,6 @@ class Sudoku constructor(
             if (i !in immutableIndices)
                 boardArray[i] = 0
         candidates.reCalc()
-        notes.clear()
     }
 
     override val storageKey: String get() = Sudoku.storageKey
@@ -156,49 +155,6 @@ class Sudoku constructor(
             sudoku.reset()
             sudoku.saveToStorage()
             return sudoku
-        }
-
-        fun createSudoku3(blockSizeX: Int, blockSizeY: Int): Sudoku {
-            val sudoku = blankSudoku(blockSizeX, blockSizeY)
-            val solver = Solver(sudoku)
-
-            do {
-                println("++++++++++++++++")
-                val randomIndices = (0 until sudoku.size).shuffled().take(sudoku.blockSize)
-                repeat(sudoku.blockSize) { i ->
-                    val index = randomIndices[i]
-                    val value = sudoku.candidates.getAt(index).random()
-                    solver.internSet(index, value)
-                }
-            } while (
-                !sudoku.isValid() ||
-                !solver.firstSolution.solve() ||
-                !sudoku.immutableIndices.addAll(randomIndices)
-            )
-            sudoku.reset()
-
-            solver.allSolution.solve()
-            val tree =
-                solver.allSolution.solutionTree
-            for (node in tree.traversLevelOrder()) {
-                for ((i, nextNode) in node.nextNodes.withIndex()) {
-                    if (nextNode != null && nextNode.index == -1) {
-                        val boardArray =
-                            node.boardArray.copyOf()
-                        boardArray[node.index] =
-                            node.values[i]
-                        val board =
-                            ValidatedBoardImpl(
-                                blockSizeX,
-                                blockSizeY,
-                                boardArray
-                            )
-                        return Sudoku(board)
-                    }
-                }
-            }
-
-            throw IllegalStateException()
         }
     }
 }

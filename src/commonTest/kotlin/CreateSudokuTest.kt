@@ -10,24 +10,24 @@ class CreateSudokuTest : KorgeTest() {
     init {
         Storage.nativeStorage = stage.storage
     }
+
     @OptIn(ExperimentalTime::class)
     @Test
-    fun create3x3test() {
-        val timeCreateSudoku1 = measureTime {
-            repeat(5) { Sudoku.createSudoku1(3, 3) }
+    fun create3x3test1() {
+        val time = measureTime {
+            repeat(10) { Sudoku.createSudoku1(3, 3) }
         }
         println("***************************************")
-        //val timeCreateSudoku2 = measureTime {
-        //    repeat(10) { Sudoku.createSudoku2(3, 3) }
-        //}
-        //println("***************************************")
-        //val timeCreateSudoku3 = measureTime {
-        //    repeat(1) { Sudoku.createSudoku3(3, 3) }
-        //}
-        //println("***************************************")
-        println("createSudoku1: $timeCreateSudoku1")
-        //println("createSudoku2: $timeCreateSudoku2")
-        //println("createSudoku3: $timeCreateSudoku3")
-        //println(Sudoku.createSudoku3(3, 3))
+        println("createSudoku1: $time")
+    }
+
+    @OptIn(ExperimentalTime::class)
+    @Test
+    fun create3x3test2() {
+        val time = measureTime {
+            repeat(10) { Sudoku.createSudoku2(3, 3) }
+        }
+        println("***************************************")
+        println("createSudoku1: $time")
     }
 }
