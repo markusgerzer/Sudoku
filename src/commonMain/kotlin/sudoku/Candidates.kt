@@ -21,6 +21,19 @@ class Candidates(private val board: Board) {
         .map { data[it] }
         .flatten()
 
+    fun indexWithMinCandidates(): Int {
+        var lowestCandidatesSize = board.blockSize
+        var index = 0
+        for (i in data.indices) {
+            if (data[i].size in 1..lowestCandidatesSize) {
+                index = i
+                lowestCandidatesSize = data[i].size
+                if (lowestCandidatesSize == 2) break
+            }
+        }
+        return index
+    }
+
     fun reCalc() {
         data = Array(board.size) {
             if (board.boardArray[it] == 0) board.values - noCandidatesAt(it)

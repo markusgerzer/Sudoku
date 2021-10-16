@@ -130,9 +130,9 @@ class Sudoku constructor(
                     solver.internSet(index, value)
                 }
             } while (
-                !sudoku.isValid() &&
-                !solver.firstSolution.solve() &&
-                sudoku.immutableIndices.addAll(randomIndices)
+                !sudoku.isValid() ||
+                !solver.firstSolution.solve() ||
+                !sudoku.immutableIndices.addAll(randomIndices)
             )
             sudoku.reset()
 
@@ -158,47 +158,47 @@ class Sudoku constructor(
             return sudoku
         }
 
-        /*
-        fun createSudoku2(blockSizeX: Int, blockSizeY: Int): Sudoku {
-            fun setFirstValues(blockSizeX: Int, blockSizeY: Int): Sudoku {
-                var sudoku: Sudoku
-                do {
-                    sudoku = blankSudoku(blockSizeX, blockSizeY)
+        fun createSudoku3(blockSizeX: Int, blockSizeY: Int): Sudoku {
+            val sudoku = blankSudoku(blockSizeX, blockSizeY)
+            val solver = Solver(sudoku)
 
-                    // Set 27% - 44% of the Sudoku values at start.
-                    val range = (.27 * sudoku.size).roundToInt()..(.44 * sudoku.size).roundToInt()
-                    val nStartValues = range.random()
+            do {
+                println("++++++++++++++++")
+                val randomIndices = (0 until sudoku.size).shuffled().take(sudoku.blockSize)
+                repeat(sudoku.blockSize) { i ->
+                    val index = randomIndices[i]
+                    val value = sudoku.candidates.getAt(index).random()
+                    solver.internSet(index, value)
+                }
+            } while (
+                !sudoku.isValid() ||
+                !solver.firstSolution.solve() ||
+                !sudoku.immutableIndices.addAll(randomIndices)
+            )
+            sudoku.reset()
 
-                    for (i in 0 until nStartValues) {
-                        var index: Int
-                        do {
-                            // Set gameIndex by random
-                            index = (0 until sudoku.size).random()
-                            // Since startIndices is as Set, we can test the return value of
-                            // the add method to make sure the gameIndex is unique.
-                        } while (!sudoku._immutableIndices.add(index))
+            solver.allSolution.solve()
+            val tree =
+                solver.allSolution.solutionTree
+            for (node in tree.traversLevelOrder()) {
+                for ((i, nextNode) in node.nextNodes.withIndex()) {
+                    if (nextNode != null && nextNode.index == -1) {
+                        val boardArray =
+                            node.boardArray.copyOf()
+                        boardArray[node.index] =
+                            node.values[i]
+                        val board =
+                            ValidatedBoardImpl(
+                                blockSizeX,
+                                blockSizeY,
+                                boardArray
+                            )
+                        return Sudoku(board)
                     }
-
-                    // Set each value 1 time at the first n startIndices. n = size
-                    for ((i, value) in sudoku.values.withIndex()) {
-                        val index = sudoku._immutableIndices.elementAt(i)
-                        sudoku[index] = value
-                    }
-
-                } while (!sudoku.solve(false))
-                sudoku.reset()
-
-                return sudoku
+                }
             }
 
-            var sudoku: Sudoku
-            do {
-                sudoku = setFirstValues(blockSizeX, blockSizeY)
-            } while (!sudoku.solve(true))
-
-            sudoku.reset()
-            return sudoku
+            throw IllegalStateException()
         }
-         */
     }
 }

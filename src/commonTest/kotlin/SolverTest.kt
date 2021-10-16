@@ -236,3 +236,33 @@ class SolverTest2 {
         println(sudoku2)
     }
 }
+
+
+class SolverAllSolutionTest {
+    @Test
+    fun test1() {
+        val board = """
+            00 20
+            10 00
+            00 00
+            00 02
+        """.toBoard(2, 2)
+        val sudoku = Sudoku(board)
+        val solver = Solver(sudoku)
+
+        solver.allSolution.solve()
+        println(solver.allSolution.solutionTree.solutions)
+        println(solver.allSolution.solutionTree.depth)
+        for (node in solver.allSolution.solutionTree.traversLevelOrder()) {
+            println(node.boardArray.toList())
+        }
+
+        solver.allSolution.fast = false
+        solver.allSolution.solve()
+        println(solver.allSolution.solutionTree.solutions)
+        println(solver.allSolution.solutionTree.depth)
+        for (node in solver.allSolution.solutionTree.traversLevelOrder()) {
+            println(node.boardArray.toList())
+        }
+    }
+}
