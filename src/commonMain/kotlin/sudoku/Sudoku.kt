@@ -1,6 +1,10 @@
 package sudoku
 
+
+import com.soywiz.korio.async.async
 import com.soywiz.korio.serialization.json.Json
+import kotlinx.coroutines.*
+import kotlinx.coroutines.selects.select
 import storage.Storage
 
 
@@ -91,7 +95,17 @@ class Sudoku constructor(
             }
         }
 
-        fun createSudoku(blockSizeX: Int, blockSizeY: Int) = createSudoku2(blockSizeX, blockSizeY)
+        suspend fun createSudoku(blockSizeX: Int, blockSizeY: Int) = createSudoku2(blockSizeX, blockSizeY)
+
+        suspend fun createSudokuWithMultipleTreads(blockSizeX: Int, blockSizeY: Int)= coroutineScope {
+            select<Sudoku> {
+                repeat(8) {
+                    async {
+                        createSudoku(blockSizeX, blockSizeY)
+                    }.onAwait { it }
+                }
+            }.also { coroutineContext.cancelChildren() }
+        }
 
         fun createSudoku1(blockSizeX: Int, blockSizeY: Int): Sudoku {
             val sudoku = blankSudoku(blockSizeX, blockSizeY)
@@ -117,39 +131,43 @@ class Sudoku constructor(
             return sudoku
         }
 
-        fun createSudoku2(blockSizeX: Int, blockSizeY: Int): Sudoku {
+        suspend fun createSudoku2(blockSizeX: Int, blockSizeY: Int): Sudoku {
             val sudoku = blankSudoku(blockSizeX, blockSizeY)
             val solver = Solver(sudoku)
 
             do {
                 println("++++++++++++++++")
+                sudoku.reset()
                 val randomIndices = (0 until sudoku.size).shuffled().take(sudoku.blockSize)
+                for (index in randomIndices) {
+                    val value = sudoku.candidates.getAt(index).random()
+                    solver.internSet(index, value)
+                }
+                /*
                 repeat(sudoku.blockSize) { i ->
                     val index = randomIndices[i]
                     val value = sudoku.candidates.getAt(index).random()
                     solver.internSet(index, value)
-                }
+                }*/
             } while (
                 !sudoku.isValid() ||
-                !solver.firstSolution.solve() ||
+                !solver.firstSolution.solveTimeout() ||
                 !sudoku.immutableIndices.addAll(randomIndices)
             )
             sudoku.reset()
 
 
-            while (!solver.uniqueSolution.solve()) {
+            while (!solver.uniqueSolution.solveTimeout()) {
                 println("----------------")
                 val emptyIndices = (0 until sudoku.size).filter { sudoku[it] == 0 }
                 val index = emptyIndices.random()
                 val value = sudoku.candidates.getAt(index).random()
                 solver.internSet(index, value)
-
-                if(solver.firstSolution.solve()) {
+                if(solver.firstSolution.solveTimeout()) {
                     sudoku.immutableIndices.add(index)
                 } else {
                     solver.internSet(index, 0)
                 }
-
                 sudoku.reset()
             }
 

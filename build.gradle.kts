@@ -17,7 +17,7 @@ buildscript {
 apply<KorgeGradlePlugin>()
 
 korge {
-	id = "com.example.example"
+	id = "de.markusgerzer.sudoku"
 	name = "Sudoku"
 
 	authorName = "Markus Gerzer"

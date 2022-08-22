@@ -1,8 +1,14 @@
 package sudoku
 
+import com.soywiz.klock.milliseconds
+import com.soywiz.klock.seconds
+import com.soywiz.korio.async.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
+
 
 interface SolverI {
     fun solve(): Boolean
+    suspend fun solveTimeout(): Boolean
 }
 
 
@@ -14,6 +20,22 @@ class Solver (private val sudoku: Sudoku): SolverI {
     }
 
     override fun solve() = solve(::defaultSolveBacktrack, ::defaultSolveImpl)
+    override suspend fun solveTimeout() = solveTimeout(::defaultSolveBacktrack, ::defaultSolveImpl)
+
+    private suspend fun solveTimeout(
+        solveBacktrack: () -> Boolean,
+        solveImpl: (()->Boolean) -> Boolean = ::defaultSolveImpl
+    ) = withTimeoutOrNull(1) {
+        solveImpl(solveBacktrack)
+            .also { success ->
+                if (success) {
+                    sudoku.solvedBoard =
+                        sudoku.boardArray.toList()
+                    println("T")
+                } else
+                    println("N")
+            }
+    } ?: println("!!!Timeout!!!").run { false }
 
     private fun solve(
         solveBacktrack: () -> Boolean,
@@ -84,10 +106,11 @@ class Solver (private val sudoku: Sudoku): SolverI {
     /**
      * Find one Solution
      * Methode solve() doesn't test for more solutions
-     * and true if the first solution is found.
+     * returns true if the first solution is found.
      */
     val firstSolution = object : SolverI {
         override fun solve(): Boolean = solve(::firstSolutionBacktrack)
+        override suspend fun solveTimeout(): Boolean = solveTimeout(::firstSolutionBacktrack)
         private fun firstSolutionBacktrack(): Boolean {
             print("B")
 
@@ -113,6 +136,7 @@ class Solver (private val sudoku: Sudoku): SolverI {
         inner class MultiSolution : Throwable()
         private var savedBoard: IntArray? = null
         override fun solve(): Boolean = solve(::uniqueSolutionBacktrack, ::uniqueSolutionSolveImpl)
+        override suspend fun solveTimeout(): Boolean = solveTimeout(::uniqueSolutionBacktrack, ::uniqueSolutionSolveImpl)
 
         private fun uniqueSolutionSolveImpl(uniqueSolutionBacktrack: ()->Boolean) : Boolean {
             savedBoard = null
@@ -163,6 +187,7 @@ class Solver (private val sudoku: Sudoku): SolverI {
     val allSolution = object : AllSolutionSolver {
         override val solutionTree = SolutionTree()
         override fun solve() = solve(::allSolutionBacktrack, ::allSolutionSolveImpl)
+        override suspend fun solveTimeout() = solveTimeout(::allSolutionBacktrack, ::allSolutionSolveImpl)
         override var fast = true
 
         private fun allSolutionSolveImpl (allSolutionBacktrack: ()->Boolean) : Boolean {
